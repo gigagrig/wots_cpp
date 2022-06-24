@@ -21,6 +21,12 @@
     <ClCompile Include="..\game_cpp\main.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\game_cpp\ship.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game_cpp\aircraft.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\framework\engine.hpp">
@@ -31,6 +37,15 @@
     </ClInclude>
     <ClInclude Include="..\framework\scene.hpp">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game_cpp\ship.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game_cpp\aircraft.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game_cpp\traits.hpp">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -21,13 +21,18 @@
   <ItemGroup>
     <ClCompile Include="..\framework\engine.cpp" />
     <ClCompile Include="..\framework\scene.cpp" />
+    <ClCompile Include="..\game_cpp\aircraft.cpp" />
     <ClCompile Include="..\game_cpp\game.cpp" />
     <ClCompile Include="..\game_cpp\main.cpp" />
+    <ClCompile Include="..\game_cpp\ship.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\framework\engine.hpp" />
     <ClInclude Include="..\framework\game.hpp" />
     <ClInclude Include="..\framework\scene.hpp" />
+    <ClInclude Include="..\game_cpp\aircraft.hpp" />
+    <ClInclude Include="..\game_cpp\ship.hpp" />
+    <ClInclude Include="..\game_cpp\traits.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
