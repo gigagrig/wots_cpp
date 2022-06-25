@@ -63,7 +63,7 @@ void Aicraft::update(float dt)
 {
 	updateState();
 
-	if (state != AicraftState::MovingToTarget)
+	if (state != AicraftState::MovingToTarget && state != AicraftState::MovingToBase)
 	{
 		return;
 	}
@@ -85,7 +85,10 @@ void Aicraft::update(float dt)
 		}
 	}
 
-	Vector2 goalDirection(target.x - position.x, target.y - position.y);
+	Vector2 goalDirection = state == AicraftState::MovingToTarget ? 
+		Vector2{target.x - position.x, target.y - position.y} :
+		Vector2{ship->GetPosition().x - position.x, ship->GetPosition().y - position.y};
+
 	if (goalDirection.isZero())
 	{
 		return;
@@ -124,6 +127,8 @@ void Aicraft::launch()
 	takticalTask = AicraftTakticalTask::MovingToTraget;
 	position = ship->GetPosition();
 	angle = ship->GetAngle();
+	speed = 0;
+	angularSpeed = 0;
 	nextStateTime = std::chrono::system_clock::now();
 	nextStateTime += std::chrono::seconds(params::aircraft::FLIGHT_TIME_SEC);
 
@@ -165,12 +170,16 @@ void Aicraft::updateState()
 	case AicraftState::Ready:
 		break;
 	case AicraftState::MovingToTarget:
+		if (isTimeToGoToBase())
+		{
+			state = AicraftState::MovingToBase;
+		}
+		break;
+	case AicraftState::MovingToBase:
 		if (std::chrono::system_clock::now() > nextStateTime)
 		{
 			onLanded();
 		}
-		break;
-	case AicraftState::MovingToBase:
 		break;
 	default:
 		break;
@@ -180,4 +189,18 @@ void Aicraft::updateState()
 		GAME_LOG(game::LOG_INFO, "%d state changed:  %s -> %s", number, toString(originalState), toString(state));
 		//printf("%d state changed:  %s -> %s\n", number, toString(originalState), toString(state));
 	}
+}
+
+bool Aicraft::isTimeToGoToBase()
+{
+	float circleLength = 2.f*M_PI * fabs(speed / angularSpeed);
+	Vector2 shipDirection(ship->GetPosition().x - position.x, ship->GetPosition().y - position.y);
+	float distance = circleLength + shipDirection.length();
+	float needTime = distance / fabs(speed);
+	auto estimatedArrival =  std::chrono::system_clock::now();
+	estimatedArrival += std::chrono::microseconds(static_cast<int>(needTime * 1000000.f));
+	estimatedArrival += std::chrono::seconds(1);
+	if (estimatedArrival > nextStateTime)
+		return true;
+	return false;
 }

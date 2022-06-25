@@ -20,8 +20,8 @@ namespace params
 		constexpr float LINEAR_SPEED = 2.5f;
 		constexpr float ACCELERATION = 0.2f;
 		constexpr float ANGULAR_SPEED = 0.25*2*3.14f;
-		constexpr int FLIGHT_TIME_SEC = 5;
-		constexpr int FUELING_TIME_SEC = 10;
+		constexpr int FLIGHT_TIME_SEC = 30;
+		constexpr int FUELING_TIME_SEC = 25;
 	}
 }
 
@@ -78,6 +78,7 @@ public:
 	{ }
 
 	inline bool isZero() const { return ::isZero(x) && ::isZero(y); }
+	inline float length() const { return sqrtf(x*x + y* y); }
 };
 
 inline Vector2 operator + (Vector2 const &left, Vector2 const &right)

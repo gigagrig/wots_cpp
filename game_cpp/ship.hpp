@@ -25,7 +25,7 @@ public:
 	void keyReleased(int key);
 	void mouseClicked(Vector2 worldPosition, bool isLeftButton);
 
-	Vector2 GetPosition() { return position; }
+	const Vector2& GetPosition() { return position; }
 	float GetAngle() { return angle; }
 
 protected:

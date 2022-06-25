@@ -56,6 +56,7 @@ public:
 protected:
 	
 	void updateState();
+	bool isTimeToGoToBase();
 
 protected:
 	scene::Mesh *mesh;
