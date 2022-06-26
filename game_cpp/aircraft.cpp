@@ -25,6 +25,29 @@ namespace
 			return "Undefined";
 		}
 	}
+
+	float turnRadius(float speed, float angularSpeed)
+	{
+		return fabs(speed / angularSpeed);
+	}
+
+	Vector2 centerOfTurn(Vector2 position, float angle, float speed, float angularSpeed)
+	{
+		const float normalAngle = angularSpeed > 0 ? angle + M_PI / 2 : angle - M_PI / 2;
+		Vector2 normal{cosf(normalAngle), sinf(normalAngle)};
+		const float r = turnRadius(speed, angularSpeed);
+		normal = r*normal;
+		const Vector2 center = position + normal;
+		return center;
+	}
+
+	bool isPointInCircle(Vector2 point, Vector2 center, float r)
+	{
+		const Vector2 diff = point - center;
+		return diff.length() < r - 0.1;
+	}
+
+	
 }
 
 
@@ -85,9 +108,9 @@ void Aicraft::update(float dt)
 		}
 	}
 
-	Vector2 goalDirection = state == AicraftState::MovingToTarget ? 
-		Vector2{target.x - position.x, target.y - position.y} :
-		Vector2{ship->GetPosition().x - position.x, ship->GetPosition().y - position.y};
+	Vector2 goalDirection = (state == AicraftState::MovingToTarget) ? 
+		target - position :
+		ship->GetPosition() - position;
 
 	if (goalDirection.isZero())
 	{
@@ -95,7 +118,6 @@ void Aicraft::update(float dt)
 	}
 
 	float targetAngle = std::atan2f(goalDirection.y, goalDirection.x);
-	//targetAngle = scopedAngle(targetAngle);
 	float diff = targetAngle - angle;
 	if (isEqual(cosf(diff), 1))
 	{
@@ -109,16 +131,19 @@ void Aicraft::update(float dt)
 	}
 	
 	float sign = sinf(diff) >= 0 ? 1.f : -1.f;
-	float add = fabsf(diff);
-	if (add > M_PI)
+	
+	//float add = add > params::aircraft::ANGULAR_SPEED ? params::aircraft::ANGULAR_SPEED : add;
+	float add = params::aircraft::ANGULAR_SPEED;
+	angularSpeed = sign * add;
+
+	const float r = turnRadius(speed, angularSpeed);
+	const Vector2 center = centerOfTurn(position, angle, speed, angularSpeed);
+	Vector2 goal = (state == AicraftState::MovingToTarget) ? target : ship->GetPosition();
+	if (isPointInCircle(goal, center, r))
 	{
-		add = 2*M_PI - add;
+		angularSpeed = - angularSpeed;
 	}
 
-	
-	//add = add > params::aircraft::ANGULAR_SPEED ? params::aircraft::ANGULAR_SPEED : add;
-	add = params::aircraft::ANGULAR_SPEED;
-	angularSpeed = sign * add;
 }
 
 void Aicraft::launch()
@@ -157,6 +182,7 @@ bool Aicraft::onTakeoff()
 void Aicraft::updateState()
 {
 	auto originalState = state;
+	const Vector2 shipVector = ship->GetPosition() - position;
 	switch (state)
 	{
 	case AicraftState::NotReady:
@@ -176,7 +202,7 @@ void Aicraft::updateState()
 		}
 		break;
 	case AicraftState::MovingToBase:
-		if (std::chrono::system_clock::now() > nextStateTime)
+		if (shipVector.length() < 0.1)
 		{
 			onLanded();
 		}
@@ -193,7 +219,7 @@ void Aicraft::updateState()
 
 bool Aicraft::isTimeToGoToBase()
 {
-	float circleLength = 2.f*M_PI * fabs(speed / angularSpeed);
+	float circleLength = 2.f*M_PI * turnRadius(speed, angularSpeed);
 	Vector2 shipDirection(ship->GetPosition().x - position.x, ship->GetPosition().y - position.y);
 	float distance = circleLength + shipDirection.length();
 	float needTime = distance / fabs(speed);

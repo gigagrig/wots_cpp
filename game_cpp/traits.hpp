@@ -20,13 +20,13 @@ namespace params
 		constexpr float LINEAR_SPEED = 2.5f;
 		constexpr float ACCELERATION = 0.2f;
 		constexpr float ANGULAR_SPEED = 0.25*2*3.14f;
-		constexpr int FLIGHT_TIME_SEC = 30;
-		constexpr int FUELING_TIME_SEC = 25;
+		constexpr int FLIGHT_TIME_SEC = 120;
+		constexpr int FUELING_TIME_SEC = 10;
 	}
 }
 
 constexpr float M_PI = 3.14159265358979323846f; // pi
-constexpr float M_EPSILON = 0.000001f;
+constexpr float M_EPSILON = 0.00001f;
 
 inline float scopedAngle(float angle)
 {
@@ -86,6 +86,10 @@ inline Vector2 operator + (Vector2 const &left, Vector2 const &right)
 	return Vector2(left.x + right.x, left.y + right.y);
 }
 
+inline Vector2 operator - (Vector2 const &left, Vector2 const &right)
+{
+	return Vector2(left.x - right.x, left.y - right.y);
+}
 
 inline Vector2 operator * (float left, Vector2 const &right)
 {
