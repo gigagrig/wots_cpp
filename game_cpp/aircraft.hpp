@@ -2,7 +2,7 @@
 
 #include "../framework/scene.hpp"
 #include "../framework/game.hpp"
-#include "traits.hpp"
+#include "utils.hpp"
 
 #include <memory>
 #include <chrono>
@@ -21,16 +21,11 @@ enum class AicraftState
 	NotReady = 0,
 	Fueling,
 	Ready,
+	Takeoff,
 	MovingToTarget,
 	MovingToBase
 };
 
-enum class AicraftTakticalTask
-{
-	No = 0,
-	Takeoff,
-	MovingToTraget
-};
 
 class Aicraft
 {
@@ -41,32 +36,29 @@ public:
 
 
 	void init(Ship *ship, int sideNumber);
-	void deinit();
+	void removeMesh();
 
-	AicraftState getState() { return state; }
-
+	AicraftState getState() const { return state; }
 
 	void launch();
 	void onLanded();
 	void update(float dt);
-	void newTarget(Vector2 worldPosition);
-
-	bool onTakeoff();
+	void newTarget(Vector2 targetPosition);
 
 protected:
-	
 	void updateState();
-	bool isTimeToGoToBase();
+	void updatePosition(float dt);
+	void updateFlightParams(float dt);
+	void setState(AicraftState newState);
+	bool isTimeToGoToBase() const;
 
 protected:
 	scene::Mesh *mesh;
 	Ship *ship;
 	int number;
-
 	AicraftState state;
-	AicraftTakticalTask takticalTask;
-
 	Vector2 position;
+	float shipPosition;
 	Vector2 target;
 	std::chrono::time_point<std::chrono::system_clock> nextStateTime;
 	float angle = 0;

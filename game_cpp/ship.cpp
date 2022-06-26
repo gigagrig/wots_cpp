@@ -35,8 +35,8 @@ void Ship::deinit()
 
 void Ship::update(float dt)
 {
-	float linearSpeed = 0.f;
-	float angularSpeed = 0.f;
+	linearSpeed = 0.f;
+	angularSpeed = 0.f;
 
 	if (input[game::KEY_FORWARD])
 	{
@@ -93,8 +93,18 @@ void Ship::mouseClicked(Vector2 worldPosition, bool isLeftButton)
 	}
 }
 
+Vector2 Ship::localToGlobal(float localPosition) const
+{
+	Vector2 shipDirection(cosf(angle), sinf(angle));
+	return position + localPosition*shipDirection;
+}
 
-#include <iostream>
+bool Ship::isOnShip(float localPosition) const
+{
+	constexpr float shipFront = 0.4f;
+	return localPosition <= shipFront;
+}
+
 void Ship::tryLaunchAicraft()
 {
 	if (! (aicrafts.front()->getState() == AicraftState::Ready))

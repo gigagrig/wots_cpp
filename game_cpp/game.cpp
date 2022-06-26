@@ -60,7 +60,7 @@ namespace game
 			switch (level)
 			{
 			case LOG_DEBUG:
-				SetConsoleTextAttribute(hConsole, 0); 
+				SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); // white
 				break; 
 			case LOG_INFO:
 				SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN); 

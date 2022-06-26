@@ -44,7 +44,7 @@
     <ClInclude Include="..\game_cpp\aircraft.hpp">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="..\game_cpp\traits.hpp">
+    <ClInclude Include="..\game_cpp\utils.hpp">
       <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>

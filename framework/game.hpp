@@ -1,5 +1,33 @@
 #pragma once
 
+
+//-------------------------------------------------------
+//	game parameters
+//-------------------------------------------------------
+
+namespace params
+{
+	namespace ship
+	{
+		constexpr float LINEAR_SPEED = 0.25f;
+		constexpr float ANGULAR_SPEED = 0.25f;
+		constexpr int AICRAFTS_COUNT = 5;
+	}
+
+	namespace aircraft
+	{
+		constexpr float LINEAR_SPEED = 2.5f;
+		constexpr float ACCELERATION = 0.2f;
+		constexpr float ANGULAR_SPEED = 0.25 * 2 * 3.14f;
+		constexpr int FLIGHT_TIME_SEC = 120;
+		constexpr int FUELING_TIME_SEC = 20;
+	}
+}
+
+//-------------------------------------------------------
+//	game public interface
+//-------------------------------------------------------
+
 namespace game
 {
 	void init();
@@ -35,6 +63,5 @@ namespace game
 		sprintf_s(buffer, format, __VA_ARGS__);\
 		log(level, buffer);\
 	}
-
 }
 
