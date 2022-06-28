@@ -7,7 +7,7 @@
 
 namespace
 {
-	constexpr float BEST_EPS = 0.1f;
+	constexpr float POS_EPS = 0.1f;
 
 	const char* toString(AicraftState state)
 	{
@@ -48,7 +48,7 @@ namespace
 	bool isPointInCircle(Vector2 point, Vector2 center, float r)
 	{
 		const Vector2 diff = point - center;
-		return diff.length() < r - BEST_EPS;
+		return diff.length() <= r;
 	}
 	
 }
@@ -70,9 +70,9 @@ void Aicraft::init(Ship *shiparg, int sideNumber)
 	ship = shiparg;
 	number = sideNumber;
 	setState(AicraftState::Ready);
-	position = Vector2(0.f, 0.f);
-	angle = 0.f;
 	acceleration = params::aircraft::ACCELERATION;
+	flybyRadius = turnRadius(params::aircraft::LINEAR_SPEED, params::aircraft::ANGULAR_SPEED) +
+					params::aircraft::FLYBY_DISTANCE * number;
 }
 
 void Aicraft::removeMesh()
@@ -92,8 +92,8 @@ void Aicraft::update(float dt)
 		return;
 	}
 
-	updatePosition(dt);	
 	updateFlightParams(dt);
+	updatePosition(dt);
 }
 
 void Aicraft::launch()
@@ -159,7 +159,7 @@ void Aicraft::updateState()
 		}
 		break;
 	case AicraftState::MovingToBase:
-		if (shipVector.length() < BEST_EPS)
+		if (shipVector.length() < POS_EPS)
 		{
 			onLanded();
 		}
@@ -198,45 +198,17 @@ void Aicraft::updateFlightParams(float dt)
 		}
 	}
 
-	if (state == AicraftState::Takeoff)
+	switch (state)
 	{
-		return;
-	}
-
-	const Vector2 goalDirection = (state == AicraftState::MovingToTarget) ?
-		target - position :
-		ship->getPosition() - position;
-
-	if (goalDirection.isZero())
-	{
-		return;
-	}
-
-	const float targetAngle = std::atan2f(goalDirection.y, goalDirection.x);
-	const float diff = targetAngle - angle;
-	if (math::isEqual(cosf(diff), 1))
-	{
-		angularSpeed = 0;
-		return;
-	}
-	if (math::isAbsEqual(diff, math::PI))
-	{
-		angularSpeed = params::aircraft::ANGULAR_SPEED;
-		return;
-	}
-
-	const float sign = sinf(diff) >= 0 ? 1.f : -1.f;
-
-	const float add = params::aircraft::ANGULAR_SPEED;
-	angularSpeed = sign * add;
-
-	const float r = turnRadius(speed, angularSpeed);
-	const Vector2 center = centerOfTurn(position, angle, speed, angularSpeed);
-	const Vector2 goal = (state == AicraftState::MovingToTarget) ? target : ship->getPosition();
-	if (isPointInCircle(goal, center, r))
-	{
-		angularSpeed = -angularSpeed;
-	}
+	case AicraftState::MovingToTarget:
+		adjustTrajectoryToMoveAroundTarget(target);
+		break;
+	case AicraftState::MovingToBase:
+		adjustTrajectoryToTarget(ship->getPosition());
+		break;
+	default:
+		break;
+	} 
 }
 
 void Aicraft::setState(AicraftState newState)
@@ -261,4 +233,71 @@ bool Aicraft::isTimeToGoToBase() const
 	if (estimatedArrival > nextStateTime)
 		return true;
 	return false;
+}
+
+void Aicraft::adjustTrajectoryToTarget(Vector2 target)
+{
+	const Vector2 targetDirection = target - position;
+
+	if (targetDirection.isZero())
+	{
+		return;
+	}
+
+	const float targetAngle = std::atan2f(targetDirection.y, targetDirection.x);
+	const float diff = targetAngle - angle;
+	if (math::isEqual(cosf(diff), 1))
+	{
+		angularSpeed = 0;
+		return;
+	}
+	if (math::isAbsEqual(diff, math::PI))
+	{
+		angularSpeed = params::aircraft::ANGULAR_SPEED;
+		return;
+	}
+
+	const float sign = sinf(diff) >= 0 ? 1.f : -1.f;
+	angularSpeed = sign * params::aircraft::ANGULAR_SPEED;
+
+	// we need adjust trajectory in case target is inside of our turn
+	const float r = turnRadius(speed, angularSpeed);
+	const Vector2 center = centerOfTurn(position, angle, speed, angularSpeed);
+	if (isPointInCircle(target, center, r - POS_EPS))
+	{
+		angularSpeed = -angularSpeed;
+	}
+}
+
+void Aicraft::adjustTrajectoryToMoveAroundTarget(Vector2 target)
+{
+	const float r = flybyRadius;
+	if (isPointInCircle(position, target, r-POS_EPS)) // adjusting circle trajectory if aicraft get inside circle
+	{
+		angularSpeed = 0;
+		return;
+	}
+
+	// Moving to target circle
+	const Vector2 direction = target - position;
+	const float targetAngle = atan2f(direction.y, direction.x);
+	const float directionTangentAngle = asinf(r / direction.length());
+	if (math::isZero(directionTangentAngle))
+	{
+		angularSpeed = 0;
+		return;
+	}
+
+	const float desiredAngle = cosf(targetAngle - directionTangentAngle - angle) > cosf(targetAngle + directionTangentAngle - angle) ?
+		targetAngle - directionTangentAngle : 
+		targetAngle + directionTangentAngle;
+
+	const float diff = desiredAngle - angle;
+	if (math::isEqual(cosf(diff), 1))
+	{
+		angularSpeed = 0;
+		return;
+	}
+	const float sign = sinf(diff) >= 0 ? 1.f : -1.f;
+	angularSpeed = sign * params::aircraft::ANGULAR_SPEED;
 }

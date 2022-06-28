@@ -37,11 +37,11 @@ protected:
 	void tryLaunchAicraft();
 
 private:
-	scene::Mesh *mesh;
+	scene::Mesh *mesh = nullptr;
 	Vector2 position;
-	float angle;
-	float linearSpeed;
-	float angularSpeed;
+	float angle = 0;
+	float linearSpeed = 0;
+	float angularSpeed = 0;
 
 	bool input[game::KEY_COUNT];
 

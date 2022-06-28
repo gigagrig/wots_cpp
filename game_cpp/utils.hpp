@@ -9,7 +9,7 @@
 namespace math
 {
 constexpr float PI = 3.14159265358979323846f; // pi
-constexpr float EPSILON = 0.00001f;
+constexpr float EPSILON = 0.01f;
 
 inline float scopedAngle(float angle)
 {
