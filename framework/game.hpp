@@ -17,10 +17,11 @@ namespace params
 	namespace aircraft
 	{
 		constexpr float LINEAR_SPEED = 2.5f;
-		constexpr float ACCELERATION = 0.2f;
-		constexpr float ANGULAR_SPEED = 0.25 * 2 * 3.14f;
+		constexpr float ACCELERATION = 0.25f;
+		constexpr float ANGULAR_SPEED = 0.3 * 2 * 3.14f;
 		constexpr int FLIGHT_TIME_SEC = 120;
 		constexpr int FUELING_TIME_SEC = 20;
+		constexpr float FLYBY_DISTANCE = 0.2f;
 	}
 }
 
